@@ -656,7 +656,7 @@ public class Main {
                 break;
             System.out.println(domains[num][1] + "\t\t" + domains[num][0]);
             num++;
-
         }
+        System.out.println("\nTotal domains: " + domainCount);
     }
 }
