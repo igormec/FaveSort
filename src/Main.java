@@ -602,30 +602,61 @@ public class Main {
             dom = split[split.length-2];
 
             if(domainCount==0){
-                domains[x][0] = dom;
-                domains[x][1] = "1";
+                domains[domainCount][0] = dom;
+                domains[domainCount][1] = "1";
                 domainCount++;
 
-            }else{
-                for(int y = domainCount-1;y >= 0;y--){
-                    if (dom.equals(domains[y][0])){
+            }else {
+                boolean flag = true;
+                for (int y = domainCount - 1; y >= 0; y--) {
+                    if (dom.equals(domains[y][0])) {
                         int temp = Integer.valueOf(domains[y][1]);
                         temp++;
                         domains[y][1] = String.valueOf(temp);
+                        flag = false;
                         break;
                     }
                 }
 
+                if (flag) {
+                    domains[domainCount][0] = dom;
+                    domains[domainCount][1] = "1";
+                    domainCount++;
+
+                }
             }
-
-
-
-            System.out.println(dom + "\t\t\t\t" + link);
-
-
-
-
         }
 
+
+        //For loop to sort by most used domains
+        for(int a = 0;a < domainCount-1;a++){
+            for(int b = 0;b < domainCount-(a+1);b++){
+                int temp1 = Integer.valueOf(domains[b][1]);
+                int temp2 = Integer.valueOf(domains[b+1][1]);
+
+                if(temp1 < temp2){
+
+                    String tem = domains[b][0];
+                    domains[b][0] = domains[b+1][0];
+                    domains[b+1][0] = tem;
+
+                    tem = domains[b][1];
+                    domains[b][1] = domains[b+1][1];
+                    domains[b+1][1] = tem;
+                }
+            }
+        }
+
+
+
+        //While loop prints all domains and how many times it was found
+        int num = 0;
+        while(true){
+            if(domains[num][0] == null)
+                break;
+            System.out.println(domains[num][1] + "\t\t" + domains[num][0]);
+            num++;
+
+        }
     }
 }
