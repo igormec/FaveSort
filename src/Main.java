@@ -12,27 +12,29 @@ public class Main {
 
     public static void main (String[] args){
 
-        //createList();
 
-        //writeToFile();
+        //0 for using existing main file
+        //1 for a new rewrite of main bookmark file using html files
+        int refresh = 0;
 
-        readMainFile();
+        switch(refresh){
+            case 0:
+                readMainFile();
+                resize();
+                break;
+            case 1:
+                createList();
+                resize();
+                sort();
+                clearDuplicates();
+                resize();
+                writeToFile();
+                break;
+        }
 
-        resize();
+        //count();
 
-        sort();
-
-        writeToFile("alpha.txt");
-
-        clearDuplicates();
-
-        resize();
-
-        count();
-
-        //writeToFile("noDupes.txt");
-
-        //printArray();
+        printArray();
 
     }
 
@@ -41,7 +43,7 @@ public class Main {
     private static void importOpera(String file){
 
         try{
-            BufferedReader brO = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedReader brO = new BufferedReader(new InputStreamReader(new FileInputStream("Resources/"+file)));
             String line;
             int count = 0;
             emptyLines();
@@ -142,7 +144,7 @@ public class Main {
     private static void importFirefox(String file){
 
         try{
-            BufferedReader brFF = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedReader brFF = new BufferedReader(new InputStreamReader(new FileInputStream("Resources/"+file)));
             String line;
             int count = 0;
             emptyLines();
@@ -291,7 +293,7 @@ public class Main {
     private static void importChrome(String file){
 
         try{
-            BufferedReader brC = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            BufferedReader brC = new BufferedReader(new InputStreamReader(new FileInputStream("Resources/"+file)));
             String line;
             int count = 0;
             emptyLines();
@@ -418,7 +420,7 @@ public class Main {
     private static void writeToFile(String file){
 
         try {
-            PrintWriter writer = new PrintWriter(file, "UTF-8");
+            PrintWriter writer = new PrintWriter("Resources/"+file, "UTF-8");
 
             for(int x = 0;x < total; x++){
                 writer.println(bmArr[x][0] + "  =====  " + bmArr[x][1]);
@@ -435,7 +437,7 @@ public class Main {
     private static void readMainFile(){
 
         try{
-            BufferedReader brC = new BufferedReader(new InputStreamReader(new FileInputStream("MAIN.txt")));
+            BufferedReader brC = new BufferedReader(new InputStreamReader(new FileInputStream("Resources/"+"MAIN.txt")));
             String line;
             String[] split = new String[2];
             while((line = brC.readLine()) != null){
