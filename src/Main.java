@@ -32,9 +32,9 @@ public class Main {
                 break;
         }
 
-        //count();
+        count();
 
-        printArray();
+        //printArray();
 
     }
 
@@ -583,13 +583,11 @@ public class Main {
 
     private static void count(){
 
-        String[] domains = new String[2000];
+        String[][] domains = new String[2000][2];
         String[] split;
-        String[] split2;
         String link;
-        String oldDom = "";
-        String newDom = "";
-        int domainCount;
+        String dom = "";
+        int domainCount = 0;
 
         for(int x = 0; x < total; x++){
 
@@ -600,15 +598,29 @@ public class Main {
             //System.out.println(split[0]);
 
             link = split[0];
-            System.out.println(link);
+            split = link.split("\\.");
+            dom = split[split.length-2];
 
-            split2 = link.split(".");
+            if(domainCount==0){
+                domains[x][0] = dom;
+                domains[x][1] = "1";
+                domainCount++;
 
-            System.out.println(split2[0]);
+            }else{
+                for(int y = domainCount-1;y >= 0;y--){
+                    if (dom.equals(domains[y][0])){
+                        int temp = Integer.valueOf(domains[y][1]);
+                        temp++;
+                        domains[y][1] = String.valueOf(temp);
+                        break;
+                    }
+                }
 
-            //newDom = split[split.length-2];
+            }
 
-            //System.out.println(dom + "\t\t" + link);
+
+
+            System.out.println(dom + "\t\t\t\t" + link);
 
 
 
