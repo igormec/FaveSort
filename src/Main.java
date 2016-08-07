@@ -5,9 +5,10 @@ import java.io.*;
  */
 public class Main {
 
-    private static String[][] bmArr = new String[6000][2];
+    private static String[][] bmArr = new String[6000][4];
     private static String[] lines = new String[2000];
     private static int total = 0;
+    private static long unixTime;
 
 
     public static void main (String[] args){
@@ -32,7 +33,8 @@ public class Main {
                 break;
         }
 
-        count();
+        //count();
+        generateHTMLfile();
 
         //printArray();
 
@@ -182,6 +184,8 @@ public class Main {
         String line;
         String link = "";
         String desc = "";
+        String addDate = "";
+        String icon = "";
 
         //while loop goes through each line of HTML code
 
@@ -405,13 +409,7 @@ public class Main {
     }
 
 
-    //=================OTHER METHODS===================//
-
-    private static void emptyLines(){
-        for(int x = 0;x<2000;x++){
-            lines[x] = null;
-        }
-    }
+    //=================FILE METHODS===================//
 
     private static void writeToFile(){
         writeToFile("MAIN.txt");
@@ -441,9 +439,14 @@ public class Main {
             String line;
             String[] split = new String[2];
             while((line = brC.readLine()) != null){
-                split = line.split(" ===== ");
+                //System.out.println(line);
+                split = line.split("  =====  ");
+                //System.out.println(split[0]+" ||||||||| "+split[1]);
                 bmArr[total][0] = split[0];
-                bmArr[total][1] = split[1];
+                if(split.length == 1)
+                    bmArr[total][1] = "";
+                else
+                    bmArr[total][1] = split[1];
                 total++;
             }
 
@@ -452,6 +455,42 @@ public class Main {
             System.out.println("File read error");
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void generateHTMLfile(){
+
+        try{
+            PrintWriter writer = new PrintWriter("bookmarks_final.html", "UTF-8");
+
+            //Print file header
+            writer.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
+                                "<!-- This is an automatically generated file.\n" +
+                                "     It will be read and overwritten.\n" +
+                                "     DO NOT EDIT! -->\n" +
+                                "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">\n" +
+                                "<TITLE>Bookmarks</TITLE>\n" +
+                                "<H1>Bookmarks</H1>\n" +
+                                "<DL><p>");
+
+            writer.println( "\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                                "\" LAST_MODIFIED=\"" + updateTime() +
+                                "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
+
+            for(int x = 0; x < total; x++){
+                writer.println( "\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
+                                "ADD_DATE=\"" + updateTime() + "\" " +
+                                "ICON=\"data:image/png;base64" + "" +"\">" +
+                                bmArr[x][1] + "</A> ");
+            }
+
+            writer.println("\t</DL><p>\n</DL><p>");
+
+
+            writer.close();
+        }catch (IOException e){
             e.printStackTrace();
         }
 
@@ -610,7 +649,7 @@ public class Main {
                 boolean flag = true;
                 for (int y = domainCount - 1; y >= 0; y--) {
                     if (dom.equals(domains[y][0])) {
-                        int temp = Integer.valueOf(domains[y][1]);
+                        int temp = Integer.parseInt(domains[y][1]);
                         temp++;
                         domains[y][1] = String.valueOf(temp);
                         flag = false;
@@ -631,8 +670,8 @@ public class Main {
         //For loop to sort by most used domains
         for(int a = 0;a < domainCount-1;a++){
             for(int b = 0;b < domainCount-(a+1);b++){
-                int temp1 = Integer.valueOf(domains[b][1]);
-                int temp2 = Integer.valueOf(domains[b+1][1]);
+                int temp1 = Integer.parseInt(domains[b][1]);
+                int temp2 = Integer.parseInt(domains[b+1][1]);
 
                 if(temp1 < temp2){
 
@@ -659,4 +698,19 @@ public class Main {
         }
         System.out.println("\nTotal domains: " + domainCount);
     }
+
+
+    //=================OTHER METHODS===================//
+
+    private static void emptyLines(){
+        for(int x = 0;x<2000;x++){
+            lines[x] = null;
+        }
+    }
+
+    private static long updateTime(){
+        return System.currentTimeMillis() / 1000L;
+    }
+
+
 }
