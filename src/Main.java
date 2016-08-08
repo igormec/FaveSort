@@ -16,7 +16,7 @@ public class Main {
 
         //0 for using existing main file
         //1 for a new rewrite of main bookmark file using html files
-        int refresh = 0;
+        int refresh = 1;
 
         switch(refresh){
             case 0:
@@ -179,58 +179,66 @@ public class Main {
 
     private static void firefoxExtract(){
 
-        int count = 0;
-        int miscCount = 0;
+        int lineCount = 0;
         String line;
-        String link = "";
+        String[] split;
+        String[] s;
         String desc = "";
-        String addDate = "";
-        String icon = "";
 
         //while loop goes through each line of HTML code
-
         while(true) {
-            line = lines[count];
+            line = lines[lineCount];
             //System.out.println(line);
             if (line == null)
                 break;
 
-            if (line.contains("HREF")) {
-                int qCount, bCount;
+            if (line.contains("HREF=\"http")) {
+                int bCount = 0;
                 boolean write = false;
-                qCount = 0;
-                bCount = 0;
-                //Main loop to extract URLs
-                for (int x = 0; x < line.length(); x++) {
-                    //if write is true, all proceeding chars are written to link string until next \"
-                    if (line.charAt(x) == '\"') {
-                        qCount++;
-                        if (qCount == 2)
-                            break;
-                        if (write)
-                            write = false;
-                        else
-                            write = true;
-                    }
-                    if (write) {
-                        link = link + line.charAt(x);
+
+                //This
+                split = line.split(" ");
+                // splits the line into:
+                //HREF=...
+                //ADD_DATE=...
+                //LAST_MODIFIED=...
+                //ICON URI=...
+                //ICON=...
+
+                //For loop goes through above and picks out the list below to store in bmArr array
+                for(int aa = 0; aa < split.length; aa++) {
+                    //[0] = Link
+                    //[1] = Description
+                    //[2] = Add date
+                    //[3] = Icon
+
+                    if(split[aa].contains("HREF")){
+                        //This splits using a \" (quote). s[1] will always produce the URL
+                        s = split[aa].split("\"");
+                        bmArr[total][0] = s[1];
+                        total++;
+
+                    }else if(split[aa].contains("ADD_DATE=")){
+                        s = split[aa].split("\"");
+                        bmArr[total][2] = s[1];
+                        //System.out.println("Adding: "+ s[0] + " --- " + s[1]);
+
+                    }else if(split[aa].contains("ICON=")) {
+                        s = split[aa].split("\"");
+                        bmArr[total][3] = s[1];
+                        //System.out.println("Adding: "+ s[0] + " --- " + s[1]);
                     }
                 }
-                link = link.substring(1);
 
-
-                write = false;
                 //For loop to get description from same line as URL
                 for (int x = line.length() - 1; x > 0; x--) {
-                    //if write is true, all proceeding chars are written to link string until next \"
-                    //System.out.println(line.charAt(x));
-                    //If block breaks out of loop after full description is copied
+                    //if write is true, all previous chars are written to desc until ">"
+                    //If block breaks out of loop after full description is copied from that line
                     if (line.charAt(x) == '>') {
                         bCount++;
                         if (bCount == 2)
                             break;
                     }
-
                     //If block turns write switch on and off
                     else if(line.charAt(x) == '<'){
                         write = true;
@@ -245,9 +253,9 @@ public class Main {
 
 
                 //If next line starts with <DD> then it is a continuation of the description
-                if (lines[count+1].contains("<DD>")) {
-                    count++;
-                    line = lines[count];
+                if (lines[lineCount+1].contains("<DD>")) {
+                    lineCount++;
+                    line = lines[lineCount];
                     for (int x = 0; x < line.length(); x++) {
                         //if write is true, all proceeding chars are written to link string until next \"
                         if (line.charAt(x) == '>') {
@@ -261,33 +269,22 @@ public class Main {
                     }
 
                     //Infinite loop keeps checking following lines to see if they are part of description
-                    //breaks at the next "<" if finds since that would be end of description
+                    //breaks at the next "<" it finds since that would be end of description
                     while(true){
-                        if(lines[count+1].contains("<")){
+                        if(lines[lineCount+1].contains("<")){
                             break;
 
                         }else{
-                            count++;
-                            line = lines[count];
+                            lineCount++;
+                            line = lines[lineCount];
                             desc = desc +" "+ line;
                         }
                     }
                 }
-
-                if(link.contains("http")) {
-                    //System.out.println(link);
-                    //System.out.println(desc);
-                    bmArr[total][0] = link;
-                    bmArr[total][1] = desc;
-                    total++;
-                }else {
-                    miscCount++;
-                }
-
+                bmArr[total][1] = desc;
                 desc = "";
-                link = "";
             }
-            count++;
+            lineCount++;
         }
     }
 
