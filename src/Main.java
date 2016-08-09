@@ -461,15 +461,6 @@ public class Main {
             PrintWriter writer = new PrintWriter("bookmarks_final.html", "UTF-8");
 
             //Print file header
-            System.out.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
-                    "<!-- This is an automatically generated file.\n" +
-                    "     It will be read and overwritten.\n" +
-                    "     DO NOT EDIT! -->\n" +
-                    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">\n" +
-                    "<TITLE>Bookmarks</TITLE>\n" +
-                    "<H1>Bookmarks</H1>\n" +
-                    "<DL><p>");
-
             writer.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
                                 "<!-- This is an automatically generated file.\n" +
                                 "     It will be read and overwritten.\n" +
@@ -479,31 +470,17 @@ public class Main {
                                 "<H1>Bookmarks</H1>\n" +
                                 "<DL><p>");
 
-
-            System.out.println( "\t<DT><H3 ADD_DATE=\"" + updateTime() +
-                    "\" LAST_MODIFIED=\"" + updateTime() +
-                    "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
-
             writer.println( "\t<DT><H3 ADD_DATE=\"" + updateTime() +
                                 "\" LAST_MODIFIED=\"" + updateTime() +
                                 "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
 
 
             for(int x = 0; x < total; x++){
-                System.out.println(bmArr[x][0]);
-                System.out.println(bmArr[x][1]);
-                System.out.println(bmArr[x][2]);
-                System.out.println(bmArr[x][3]);
-                System.out.println("\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
-                        "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\" " +
-                        "ICON=\"" + bmArr[x][3] +"\">" +
-                        bmArr[x][1] + "</A> ");
                 writer.println( "\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
-                                "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\" " +
-                                "ICON=\"" + bmArr[x][3] +"\">" +
+                                "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\"" +
+                                (bmArr[x][3] == null ? "" : " ICON=\"" + bmArr[x][3] + "\"") + ">" +
                                 bmArr[x][1] + "</A> ");
             }
-
             writer.println("\t</DL><p>\n</DL><p>");
 
             writer.close();
@@ -547,11 +524,19 @@ public class Main {
 
     private static void resize(){
 
-        String[][] a = new String[total][2];
+        String[][] a = new String[total][4];
 
         for(int x = 0; x < total; x++){
+
+            /*System.out.println(bmArr[x][0]);
+            System.out.println(bmArr[x][1]);
+            System.out.println(bmArr[x][2]);
+            System.out.println(bmArr[x][3]);*/
+
             a[x][0] = bmArr[x][0];
             a[x][1] = bmArr[x][1];
+            a[x][2] = bmArr[x][2];
+            a[x][3] = bmArr[x][3];
         }
 
         bmArr = a;
@@ -593,12 +578,18 @@ public class Main {
 
                     String temp1 = bmArr[y][0];
                     String temp2 = bmArr[y][1];
+                    String temp3 = bmArr[y][2];
+                    String temp4 = bmArr[y][3];
 
                     bmArr[y][0] = bmArr[y+1][0];
                     bmArr[y][1] = bmArr[y+1][1];
+                    bmArr[y][2] = bmArr[y+1][2];
+                    bmArr[y][3] = bmArr[y+1][3];
 
                     bmArr[y+1][0] = temp1;
                     bmArr[y+1][1] = temp2;
+                    bmArr[y+1][2] = temp3;
+                    bmArr[y+1][3] = temp4;
 
                 }
             }
@@ -608,14 +599,14 @@ public class Main {
     private static void clearDuplicates(){
 
         //Make a new temp array to store unique links, becomes new bmArr
-        String[][] arr = new String[6000][2];
+        String[][] arr = new String[6000][4];
         int newTotal = 0;
         String oldLink = "";
         String newLink = "";
 
         //List is alphabetical here
         //For loop will go through and store only the first instance of each unique url it encounters
-        //Compares only URLs, uncomment lines with desc for description
+        //Compares only URLs, uncomment next 3 lines with desc for description
         //===================//
         /*String oldDesc = "";
         String newDesc = "";*/
@@ -628,6 +619,8 @@ public class Main {
             if(!newLink.equals(oldLink)/* || !newDesc.equals(oldDesc)*/){
                 arr[newTotal][0] = bmArr[x][0];
                 arr[newTotal][1] = bmArr[x][1];
+                arr[newTotal][2] = bmArr[x][2];
+                arr[newTotal][3] = bmArr[x][3];
                 newTotal++;
             }
             oldLink = newLink;
