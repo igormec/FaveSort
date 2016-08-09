@@ -216,7 +216,6 @@ public class Main {
                         //This splits using a \" (quote). s[1] will always produce the URL
                         s = split[aa].split("\"");
                         bmArr[total][0] = s[1];
-                        total++;
 
                     }else if(split[aa].contains("ADD_DATE=")){
                         s = split[aa].split("\"");
@@ -282,6 +281,7 @@ public class Main {
                     }
                 }
                 bmArr[total][1] = desc;
+                total++;
                 desc = "";
             }
             lineCount++;
@@ -326,56 +326,65 @@ public class Main {
     }
 
     private static void chromeExtract(){
-        int count = 0;
-        int miscCount = 0;
+
+        int lineCount = 0;
         String line;
-        String link = "";
+        String[] split;
+        String[] s;
         String desc = "";
 
         //while loop goes through each line of HTML code
-
         while(true) {
-            line = lines[count];
+            line = lines[lineCount];
             //System.out.println(line);
             if (line == null)
                 break;
 
-            if (line.contains("HREF")) {
-                int qCount, bCount;
+            if (line.contains("HREF=\"http")) {
+                int bCount = 0;
                 boolean write = false;
-                qCount = 0;
-                bCount = 0;
-                //Main loop to extract URLs
-                for (int x = 0; x < line.length(); x++) {
-                    //if write is true, all proceeding chars are written to link string until next \"
-                    if (line.charAt(x) == '\"') {
-                        qCount++;
-                        if (qCount == 2)
-                            break;
-                        if (write)
-                            write = false;
-                        else
-                            write = true;
-                    }
-                    if (write) {
-                        link = link + line.charAt(x);
+
+                //This
+                split = line.split(" ");
+                // splits the line into:
+                //HREF=...
+                //ADD_DATE=...
+                //ICON URI=...
+                //ICON=...
+
+                //For loop goes through above and picks out the list below to store in bmArr array
+                for(int aa = 0; aa < split.length; aa++) {
+                    //[0] = Link
+                    //[1] = Description
+                    //[2] = Add date
+                    //[3] = Icon
+
+                    if(split[aa].contains("HREF")){
+                        //This splits using a \" (quote). s[1] will always produce the URL
+                        s = split[aa].split("\"");
+                        bmArr[total][0] = s[1];
+
+                    }else if(split[aa].contains("ADD_DATE=")){
+                        s = split[aa].split("\"");
+                        bmArr[total][2] = s[1];
+                        //System.out.println("Adding: "+ s[0] + " --- " + s[1]);
+
+                    }else if(split[aa].contains("ICON=")) {
+                        s = split[aa].split("\"");
+                        bmArr[total][3] = s[1];
+                        //System.out.println("Adding: "+ s[0] + " --- " + s[1]);
                     }
                 }
-                link = link.substring(1);
 
-
-                write = false;
                 //For loop to get description from same line as URL
                 for (int x = line.length() - 1; x > 0; x--) {
-                    //if write is true, all proceeding chars are written to link string until next \"
-                    //System.out.println(line.charAt(x));
-                    //If block breaks out of loop after full description is copied
+                    //if write is true, all previous chars are written to desc until ">"
+                    //If block breaks out of loop after full description is copied from that line
                     if (line.charAt(x) == '>') {
                         bCount++;
                         if (bCount == 2)
                             break;
                     }
-
                     //If block turns write switch on and off
                     else if(line.charAt(x) == '<'){
                         write = true;
@@ -385,23 +394,12 @@ public class Main {
                         desc = line.charAt(x) + desc;
                     }
                 }
-
                 desc = desc.substring(0,desc.length()-1);
-
-                if(link.contains("http")) {
-                    //System.out.println(link);
-                    //System.out.println(desc);
-                    bmArr[total][0] = link;
-                    bmArr[total][1] = desc;
-                    total++;
-                }else {
-                    miscCount++;
-                }
-
+                bmArr[total][1] = desc;
+                total++;
                 desc = "";
-                link = "";
             }
-            count++;
+            lineCount++;
         }
     }
 
@@ -463,6 +461,15 @@ public class Main {
             PrintWriter writer = new PrintWriter("bookmarks_final.html", "UTF-8");
 
             //Print file header
+            System.out.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
+                    "<!-- This is an automatically generated file.\n" +
+                    "     It will be read and overwritten.\n" +
+                    "     DO NOT EDIT! -->\n" +
+                    "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=UTF-8\">\n" +
+                    "<TITLE>Bookmarks</TITLE>\n" +
+                    "<H1>Bookmarks</H1>\n" +
+                    "<DL><p>");
+
             writer.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
                                 "<!-- This is an automatically generated file.\n" +
                                 "     It will be read and overwritten.\n" +
@@ -472,19 +479,32 @@ public class Main {
                                 "<H1>Bookmarks</H1>\n" +
                                 "<DL><p>");
 
+
+            System.out.println( "\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                    "\" LAST_MODIFIED=\"" + updateTime() +
+                    "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
+
             writer.println( "\t<DT><H3 ADD_DATE=\"" + updateTime() +
                                 "\" LAST_MODIFIED=\"" + updateTime() +
                                 "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
 
+
             for(int x = 0; x < total; x++){
+                System.out.println(bmArr[x][0]);
+                System.out.println(bmArr[x][1]);
+                System.out.println(bmArr[x][2]);
+                System.out.println(bmArr[x][3]);
+                System.out.println("\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
+                        "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\" " +
+                        "ICON=\"" + bmArr[x][3] +"\">" +
+                        bmArr[x][1] + "</A> ");
                 writer.println( "\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
-                                "ADD_DATE=\"" + updateTime() + "\" " +
-                                "ICON=\"data:image/png;base64" + "" +"\">" +
+                                "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\" " +
+                                "ICON=\"" + bmArr[x][3] +"\">" +
                                 bmArr[x][1] + "</A> ");
             }
 
             writer.println("\t</DL><p>\n</DL><p>");
-
 
             writer.close();
         }catch (IOException e){
