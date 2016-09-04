@@ -501,7 +501,7 @@ public class Main {
     }
 
     private static void createList(){
-        String[] ffFiles = {"FF1.html", "FF2.html", "FF3.html", "FF4.html", "FF5.html", "FF6.html", "FF7.html", "FF8.html", "FF9.html", "FF10.html", "FF11.html", "FF12(01-27-16).html", "bm_firefox.txt"};
+        String[] ffFiles = {"FF1.html", "FF2.html", "FF3.html", "FF4.html", "FF5.html", "FF6.html", "FF7.html", "FF8.html", "FF9.html", "FF10.html", "FF11.html", "FF13.html", "FF14.html", "FF12(01-27-16).html", "bm_firefox.txt"};
         String[] cFiles = {"bm_chrome.txt", "C1.html"};
         String[] oFiles = {"bm_opera.txt", "O1.html", "O2.html"};
 
