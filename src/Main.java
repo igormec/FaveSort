@@ -36,7 +36,7 @@ public class Main {
                 break;
         }
 
-        count();
+        createDomainGroups();
         //generateHTMLfile();
 
         endTime = System.currentTimeMillis();
@@ -716,7 +716,7 @@ public class Main {
         total = newTotal;
     }
 
-    private static void count(){
+    private static void createDomainGroups(){
 
         String[][] domains = new String[2000][2];
         bmArrSep = new String[1000][500][4];
@@ -767,7 +767,7 @@ public class Main {
                 domains[domainCount][0] = dom;
                 domains[domainCount][1] = "1";
 
-                System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                //System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
                 bmArrSep[domainCount][groupLength][0] = bmArr[x][0];
                 bmArrSep[domainCount][groupLength][1] = bmArr[x][1];
                 bmArrSep[domainCount][groupLength][2] = bmArr[x][2];
@@ -784,7 +784,7 @@ public class Main {
                         domains[y][1] = String.valueOf(temp);
                         flag = false;
 
-                        System.out.println("Group " + y + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                        //System.out.println("Group " + y + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
                         bmArrSep[y][groupLength][0] = bmArr[x][0];
                         bmArrSep[y][groupLength][1] = bmArr[x][1];
                         bmArrSep[y][groupLength][2] = bmArr[x][2];
@@ -798,7 +798,7 @@ public class Main {
                     domains[domainCount][0] = dom;
                     domains[domainCount][1] = "1";
 
-                    System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                    //System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
                     groupLength = 0;
                     bmArrSep[domainCount][groupLength][0] = bmArr[x][0];
                     bmArrSep[domainCount][groupLength][1] = bmArr[x][1];
@@ -823,15 +823,11 @@ public class Main {
                 int arrCount2 = 0;
 
 
-                while(!bmArrSep[b][arrCount1][0].equals(null)){
+                while(!(bmArrSep[b][arrCount1][0] == null))
                     arrCount1++;
-                    System.out.println(bmArrSep[b][arrCount1].length);
-                }
 
-                while(!bmArrSep[b+1][arrCount2][0].equals(null)){
+                while(!(bmArrSep[b+1][arrCount2][0] == null))
                     arrCount2++;
-                }
-
 
                 if(arrCount1 < arrCount2){
 
@@ -850,45 +846,33 @@ public class Main {
 
                         }
                     }
-                    /*
-                    temp1 = bmArrSep[b];
-                    bmArrSep[b] = bmArrSep[b+1];
-                    bmArrSep[b+1] = temp1;*/
                 }
             }
         }
 
 
-        for(int q = 0; q < bmArrSep.length; q++){
-            if(bmArrSep[q][0][0] == null)
-                break;
-            System.out.println("Group " + q + "  -  " + bmArrSep[q].length + " Links");
-            for(int r = 0; r < bmArrSep[q].length; r++){
-                if(bmArrSep[q][r][0] == null)
+        boolean print = false;
+
+        if(print) {
+            for (int q = 0; q < bmArrSep.length; q++) {
+                if (bmArrSep[q][0][0] == null)
                     break;
-                System.out.println("\t---> "+ bmArrSep[q][r][0]);
+
+                int arrCount1 = 0;
+                while (!(bmArrSep[q][arrCount1][0] == null))
+                    arrCount1++;
+
+                System.out.println("Group " + q + "  -  " + arrCount1 + " Links");
+                for (int r = 0; r < bmArrSep[q].length; r++) {
+                    if (bmArrSep[q][r][0] == null)
+                        break;
+                    System.out.println("\t" + (r + 1) + " ---> " + bmArrSep[q][r][0]);
+                }
+                System.out.println("\n\n");
+
             }
-            System.out.println("\n\n");
-
         }
 
-
-
-
-
-
-
-
-
-        /*//While loop prints all domains and how many times it was found
-        int num = 0;
-        while(true){
-            if(domains[num][0] == null)
-                break;
-            //System.out.println(domains[num][1] + "\t\t" + domains[num][0]);
-            num++;
-        }
-        System.out.println("\nTotal domains: " + domainCount);*/
     }
 
 
