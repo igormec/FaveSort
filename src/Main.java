@@ -13,6 +13,9 @@ public class Main {
 
     public static void main (String[] args){
 
+        System.out.println("Process Started\n\n");
+        long startTime = System.currentTimeMillis();
+        long endTime;
 
         //0 for using existing main file
         //1 for a new rewrite of main bookmark file using html files
@@ -36,7 +39,9 @@ public class Main {
         count();
         //generateHTMLfile();
 
-        //printArray();
+        endTime = System.currentTimeMillis();
+        System.out.println("\n\n\nProcess Complete\nRUNTIME: " + ((endTime - startTime)/1000L) + " sec  " + ((endTime - startTime)%1000L) + " ms");
+
 
     }
 
@@ -614,6 +619,75 @@ public class Main {
         }
     }
 
+    private static void sortByDomain(){
+
+        String[] split;
+        String dom;
+        String link;
+        String link1;
+        String link2;
+        for(int x = 0; x < total-1; x++){
+
+            for(int y = 0; y < total-(x+1); y++){
+
+                dom = "";
+                link = "";
+
+                split = bmArr[y][0].split("://www.");
+                link = split[1];
+                split = link.split("/");
+                link = split[0];
+                split = link.split("\\.");
+
+                if(split[split.length-2].length() <= 2 && split.length > 2 && !split[split.length-2].equals("td")) {
+                    dom = split[split.length-3];
+
+                }else{
+                    dom = split[split.length-2];
+                }
+                link1 = dom;
+
+
+
+                split = bmArr[y+1][0].split("://www.");
+                link = split[1];
+                split = link.split("/");
+                link = split[0];
+                split = link.split("\\.");
+
+                if(split[split.length-2].length() <= 2 && split.length > 2 && !split[split.length-2].equals("td")) {
+                    dom = split[split.length-3];
+
+                }else{
+                    dom = split[split.length-2];
+                }
+                link2 = dom;
+
+                int comp = link1.compareToIgnoreCase(link2);
+
+                if(comp > 0){
+
+                    String temp1 = bmArr[y][0];
+                    String temp2 = bmArr[y][1];
+                    String temp3 = bmArr[y][2];
+                    String temp4 = bmArr[y][3];
+
+                    bmArr[y][0] = bmArr[y+1][0];
+                    bmArr[y][1] = bmArr[y+1][1];
+                    bmArr[y][2] = bmArr[y+1][2];
+                    bmArr[y][3] = bmArr[y+1][3];
+
+                    bmArr[y+1][0] = temp1;
+                    bmArr[y+1][1] = temp2;
+                    bmArr[y+1][2] = temp3;
+                    bmArr[y+1][3] = temp4;
+
+                }
+            }
+        }
+        writeToFile("DOMAIN_SORTED.txt");
+    }
+
     private static void clearDuplicates(){
 
         //Make a new temp array to store unique links, becomes new bmArr, resize after
@@ -645,10 +719,14 @@ public class Main {
     private static void count(){
 
         String[][] domains = new String[2000][2];
+        bmArrSep = new String[1000][500][4];
         String[] split;
         String link;
         String dom = "";
         int domainCount = 0;
+        int groupLength = 0;
+
+        sortByDomain();
 
         for(int x = 0; x < total; x++){
 
@@ -668,7 +746,15 @@ public class Main {
             split = link.split("\\.");
             //SPLIT MAKES: "easyweb   .   td   .   com"
 
-            if(split[split.length-2].length() <= 2 && split.length > 2) {
+            //This if else block will determine what the main domain is
+            //if the second-last element of split array is 2 or less characters long, that element is the first part of a top level domain (such as gc.ca or co.uk)
+            //therefore the main domain would be the third-last element of split array (the element BEFORE gc or co)
+            //ONE EXCEPTION IS HARDCODED IN (td) since it breaks above rules. More domains can be hard coded in by duplicating last condition
+            if(     split[split.length-2].length() <= 2 &&
+                    split.length > 2 &&
+                    !split[split.length-2].equals("td"))
+            {
+
                 dom = split[split.length-3];
                 //System.out.println("***" + split[split.length - 2] + "." + split[split.length - 1] + "  ----  " + link + "  ----  " + dom);
 
@@ -680,6 +766,13 @@ public class Main {
             if(domainCount==0){
                 domains[domainCount][0] = dom;
                 domains[domainCount][1] = "1";
+
+                System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                bmArrSep[domainCount][groupLength][0] = bmArr[x][0];
+                bmArrSep[domainCount][groupLength][1] = bmArr[x][1];
+                bmArrSep[domainCount][groupLength][2] = bmArr[x][2];
+                bmArrSep[domainCount][groupLength][3] = bmArr[x][3];
+
                 domainCount++;
 
             }else {
@@ -690,6 +783,13 @@ public class Main {
                         temp++;
                         domains[y][1] = String.valueOf(temp);
                         flag = false;
+
+                        System.out.println("Group " + y + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                        bmArrSep[y][groupLength][0] = bmArr[x][0];
+                        bmArrSep[y][groupLength][1] = bmArr[x][1];
+                        bmArrSep[y][groupLength][2] = bmArr[x][2];
+                        bmArrSep[y][groupLength][3] = bmArr[x][3];
+                        groupLength++;
                         break;
                     }
                 }
@@ -697,6 +797,15 @@ public class Main {
                 if (flag) {
                     domains[domainCount][0] = dom;
                     domains[domainCount][1] = "1";
+
+                    System.out.println("Group " + domainCount + "   ---   ADDING: " + dom + "  ----  " + bmArr[x][0]);
+                    groupLength = 0;
+                    bmArrSep[domainCount][groupLength][0] = bmArr[x][0];
+                    bmArrSep[domainCount][groupLength][1] = bmArr[x][1];
+                    bmArrSep[domainCount][groupLength][2] = bmArr[x][2];
+                    bmArrSep[domainCount][groupLength][3] = bmArr[x][3];
+                    groupLength++;
+
                     domainCount++;
 
                 }
@@ -707,33 +816,79 @@ public class Main {
         //For loop to sort by most used domains
         for(int a = 0;a < domainCount-1;a++){
             for(int b = 0;b < domainCount-(a+1);b++){
-                int temp1 = Integer.parseInt(domains[b][1]);
-                int temp2 = Integer.parseInt(domains[b+1][1]);
 
-                if(temp1 < temp2){
+                String[][] temp1 = new String[400][4];
 
-                    String tem = domains[b][0];
-                    domains[b][0] = domains[b+1][0];
-                    domains[b+1][0] = tem;
+                int arrCount1 = 0;
+                int arrCount2 = 0;
 
-                    tem = domains[b][1];
-                    domains[b][1] = domains[b+1][1];
-                    domains[b+1][1] = tem;
+
+                while(!bmArrSep[b][arrCount1][0].equals(null)){
+                    arrCount1++;
+                    System.out.println(bmArrSep[b][arrCount1].length);
+                }
+
+                while(!bmArrSep[b+1][arrCount2][0].equals(null)){
+                    arrCount2++;
+                }
+
+
+                if(arrCount1 < arrCount2){
+
+                    for(int e = 0; e < 400; e++){
+                        for( int f = 0; f < 4; f++){
+                            temp1[e][f] = bmArrSep[b][e][f];
+                            bmArrSep[b][e][f] = null;
+                        }
+                    }
+
+                    for(int e = 0; e < 400; e++){
+                        for( int f = 0; f < 4; f++){
+                            bmArrSep[b][e][f] = bmArrSep[b+1][e][f];
+                            bmArrSep[b+1][e][f] = temp1[e][f];
+                            temp1[e][f] = null;
+
+                        }
+                    }
+                    /*
+                    temp1 = bmArrSep[b];
+                    bmArrSep[b] = bmArrSep[b+1];
+                    bmArrSep[b+1] = temp1;*/
                 }
             }
         }
 
 
+        for(int q = 0; q < bmArrSep.length; q++){
+            if(bmArrSep[q][0][0] == null)
+                break;
+            System.out.println("Group " + q + "  -  " + bmArrSep[q].length + " Links");
+            for(int r = 0; r < bmArrSep[q].length; r++){
+                if(bmArrSep[q][r][0] == null)
+                    break;
+                System.out.println("\t---> "+ bmArrSep[q][r][0]);
+            }
+            System.out.println("\n\n");
 
-        //While loop prints all domains and how many times it was found
+        }
+
+
+
+
+
+
+
+
+
+        /*//While loop prints all domains and how many times it was found
         int num = 0;
         while(true){
             if(domains[num][0] == null)
                 break;
-            System.out.println(domains[num][1] + "\t\t" + domains[num][0]);
+            //System.out.println(domains[num][1] + "\t\t" + domains[num][0]);
             num++;
         }
-        System.out.println("\nTotal domains: " + domainCount);
+        System.out.println("\nTotal domains: " + domainCount);*/
     }
 
 
