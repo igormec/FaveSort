@@ -6,9 +6,9 @@ import java.io.*;
 public class Main {
 
     private static String[][] bmArr = new String[6000][4];
+    private static String[][][] bmArrSep;
     private static String[] lines = new String[2000];
     private static int total = 0;
-    private static long unixTime;
 
 
     public static void main (String[] args){
@@ -16,7 +16,7 @@ public class Main {
 
         //0 for using existing main file
         //1 for a new rewrite of main bookmark file using html files
-        int refresh = 1;
+        int refresh = 0;
 
         switch(refresh){
             case 0:
@@ -33,8 +33,8 @@ public class Main {
                 break;
         }
 
-        //count();
-        generateHTMLfile();
+        count();
+        //generateHTMLfile();
 
         //printArray();
 
@@ -648,14 +648,22 @@ public class Main {
 
             link = split[0];
             split = link.split("\\.");
-            dom = split[split.length-2];
+
+            if(split[split.length-2].length() <= 2 && split.length > 2) {
+                dom = split[split.length-3];
+                //System.out.println("***" + split[split.length - 2] + "." + split[split.length - 1] + "  ----  " + link + "  ----  " + dom);
+
+            }else{
+                dom = split[split.length-2];
+            }
+
 
             if(domainCount==0){
                 domains[domainCount][0] = dom;
                 domains[domainCount][1] = "1";
                 domainCount++;
 
-            }else {
+            }else{
                 boolean flag = true;
                 for (int y = domainCount - 1; y >= 0; y--) {
                     if (dom.equals(domains[y][0])) {
@@ -695,7 +703,6 @@ public class Main {
                 }
             }
         }
-
 
 
         //While loop prints all domains and how many times it was found
