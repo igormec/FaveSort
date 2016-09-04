@@ -93,39 +93,43 @@ public class Main {
             //System.out.println(line);
 
             //Loop goes through all chars in line
-            //qCount counts up to 2 quotes (") to break out of loop (avoids "" in description part of line)
-            boolean write = false;
+            //LINE FORMAT:  <DT><A HREF="http://luxury-alliance.tumblr.com/">The Luxury Alliance</A></DT>
+            //qCount counts up to 2 quotes (") to break out of loop (this will avoid the quotes ("") in description part of line)
+            boolean writeMode = false;
             qCount = 0;
             bCount = 0;
-            for(int x=0;x<line.length();x++){
+            for(int x=0;x < line.length();x++){
 
-                //if write is true, all proceeding chars are written to link string until next \"
+                //if write mode is true, all proceeding chars are written to link string variable until next quote \" is reached
                 if (line.charAt(x) == '\"'){
                     qCount++;
                     if(qCount == 2)
                         break;
-                    if(write)
-                        write = false;
+                    //writeMode switch only switches when a quote \" is reached
+                    if(writeMode)
+                        writeMode = false;
                     else
-                        write = true;
+                        writeMode = true;
                 }
-                if(write){
+                if(writeMode){
                     link = link + line.charAt(x);
                 }
             }
 
             //For loop to gather descriptions of links
             for(int x=0;x<line.length();x++){
-                //if write is true, all proceeding chars are written to link string until next \"
+                //if write is true, all proceeding chars are written to link string until next >
                 if(line.charAt(x) == '>'){
                     bCount++;
                     if(bCount == 2){
+                        //Cut off end tags
                         desc = line.substring(x+1,line.length()-9);
                         break;
                     }
                 }
             }
 
+            //Gets rid of unnecessary quote at start
             link = link.substring(1);
             bmArr[total][0] = link;
             bmArr[total][1] = desc;
@@ -194,7 +198,17 @@ public class Main {
 
             if (line.contains("HREF=\"http")) {
                 int bCount = 0;
-                boolean write = false;
+                boolean writeMode = false;
+
+                /*LINE FORMAT:
+                *
+                    <DT><A HREF="http://coelhealy.bandcamp.com/album/bleak-summer-demo" ADD_DATE="1397191909" LAST_MODIFIED="1397191909" ICON_URI="http://f0.bcbits.com/img/a0442004104_3.jpg" ICON="data:image/png;base64,iVBOR.....=" LAST_CHARSET="UTF-8">▶ Bleak Summer (demo) | Coel Healy</A>
+                    <DD>Bleak Summer (demo) by Coel Healy, released 09 April 2014
+                    1. Yucatán Aquifer
+                    2. Karakum Crater
+                    3. Kep
+                */
+
 
                 //This
                 split = line.split(" ");
@@ -213,7 +227,7 @@ public class Main {
                     //[3] = Icon
 
                     if(split[aa].contains("HREF")){
-                        //This splits using a \" (quote). s[1] will always produce the URL
+                        //This splits using a quote \". s[0] = HREF  and s[1] will always produce the URL
                         s = split[aa].split("\"");
                         bmArr[total][0] = s[1];
 
@@ -230,9 +244,10 @@ public class Main {
                 }
 
                 //For loop to get description from same line as URL
+                //Loop starts on the last char of the line and reads right to left (in reverse)
                 for (int x = line.length() - 1; x > 0; x--) {
-                    //if write is true, all previous chars are written to desc until ">"
-                    //If block breaks out of loop after full description is copied from that line
+                    //if writeMode is true, all previous chars are written to desc until ">"
+                    //If block will break out of loop after full description is copied from that line
                     if (line.charAt(x) == '>') {
                         bCount++;
                         if (bCount == 2)
@@ -240,10 +255,10 @@ public class Main {
                     }
                     //If block turns write switch on and off
                     else if(line.charAt(x) == '<'){
-                        write = true;
+                        writeMode = true;
                     }
 
-                    if (write) {
+                    if (writeMode) {
                         desc = line.charAt(x) + desc;
                     }
                 }
@@ -258,6 +273,7 @@ public class Main {
                     for (int x = 0; x < line.length(); x++) {
                         //if write is true, all proceeding chars are written to link string until next \"
                         if (line.charAt(x) == '>') {
+                            //This exits loop if <DD> line is empty
                             if(x+1 == line.length())
                                 break;
                             if (line.substring(x - 3, x + 1).equals("<DD>")) {
@@ -276,7 +292,8 @@ public class Main {
                         }else{
                             lineCount++;
                             line = lines[lineCount];
-                            desc = desc +" "+ line;
+                            //Entire line is part of description
+                            desc = desc +" || "+ line;
                         }
                     }
                 }
@@ -416,7 +433,7 @@ public class Main {
             PrintWriter writer = new PrintWriter("Resources/"+file, "UTF-8");
 
             for(int x = 0;x < total; x++){
-                writer.println(bmArr[x][0] + "  =====  " + bmArr[x][1]);
+                writer.println(bmArr[x][0] + "  =====  " + bmArr[x][1] + "  =====  " + bmArr[x][2] + "  =====  " + bmArr[x][3]);
             }
 
             writer.close();
@@ -432,16 +449,15 @@ public class Main {
         try{
             BufferedReader brC = new BufferedReader(new InputStreamReader(new FileInputStream("Resources/"+"MAIN.txt")));
             String line;
-            String[] split = new String[2];
+            String[] split;
             while((line = brC.readLine()) != null){
                 //System.out.println(line);
                 split = line.split("  =====  ");
-                //System.out.println(split[0]+" ||||||||| "+split[1]);
                 bmArr[total][0] = split[0];
-                if(split.length == 1)
-                    bmArr[total][1] = "";
-                else
-                    bmArr[total][1] = split[1];
+                bmArr[total][1] = split[1];
+                bmArr[total][2] = split[2];
+                bmArr[total][3] = split[3];
+
                 total++;
             }
 
@@ -554,6 +570,7 @@ public class Main {
                 link1 = bmArr[y][0];
                 split = link1.split("://");
                 //If the url doesn't contain "www" then insert it and update main bmArr array
+                //This is to keep the same format among all URLs
                 if(!(split[1].substring(0,4).equals("www."))){
                     split[1] = "www." + split[1];
                     //System.out.println("Converting: " + bmArr[y][0] + "  --TO--  " + split[0]+"://"+split[1]);
@@ -564,6 +581,7 @@ public class Main {
 
                 link2 = bmArr[y+1][0];
                 split = link2.split("://");
+                //Add a www. to the next URL as well like above
                 if(!(split[1].substring(0,4).equals("www."))){
                     split[1] = "www." + split[1];
                     //System.out.println("Converting: " + bmArr[y][0] + "  --TO--  " + split[0]+"://"+split[1]);
@@ -598,23 +616,17 @@ public class Main {
 
     private static void clearDuplicates(){
 
-        //Make a new temp array to store unique links, becomes new bmArr
+        //Make a new temp array to store unique links, becomes new bmArr, resize after
         String[][] arr = new String[6000][4];
         int newTotal = 0;
         String oldLink = "";
-        String newLink = "";
-
-        //List is alphabetical here
-        //For loop will go through and store only the first instance of each unique url it encounters
-        //Compares only URLs, uncomment next 3 lines with desc for description
-        //===================//
-        /*String oldDesc = "";
-        String newDesc = "";*/
+        String newLink;
+        String[] split;
         for(int x = 0;x < total; x++){
             //remove http(s):// from urls
-            String[] split = bmArr[x][0].split("://");
+            split = bmArr[x][0].split("://");
             newLink = split[1];
-            //newDesc = bmArr[x][1];
+
 
             if(!newLink.equals(oldLink)/* || !newDesc.equals(oldDesc)*/){
                 arr[newTotal][0] = bmArr[x][0];
@@ -640,14 +652,21 @@ public class Main {
 
         for(int x = 0; x < total; x++){
 
+            //Example URL: https://www.easyweb.td.com/waw/idp/login.htm?execution=e1s1
+
             split = bmArr[x][0].split("://www.");
             link = split[1];
+            //SPLIT MAKES: "https      ://www.      easyweb.td.com/waw/idp/login.htm?execution=e1s1"
+
 
             split = link.split("/");
-            //System.out.println(split[0]);
-
             link = split[0];
+            //SPLIT MAKES: "easyweb.td.com    /    waw    /    idp    /     login.htm?execution=e1s1"
+
+
+
             split = link.split("\\.");
+            //SPLIT MAKES: "easyweb   .   td   .   com"
 
             if(split[split.length-2].length() <= 2 && split.length > 2) {
                 dom = split[split.length-3];
@@ -663,7 +682,7 @@ public class Main {
                 domains[domainCount][1] = "1";
                 domainCount++;
 
-            }else{
+            }else {
                 boolean flag = true;
                 for (int y = domainCount - 1; y >= 0; y--) {
                     if (dom.equals(domains[y][0])) {
@@ -703,6 +722,7 @@ public class Main {
                 }
             }
         }
+
 
 
         //While loop prints all domains and how many times it was found
