@@ -515,6 +515,10 @@ public class Main {
             //Loop makes a HTML folder for every group
             int numURLsInGroup = 0;
             String dom;
+            boolean header4Made = false;
+            boolean header3Made = false;
+            boolean header2Made = false;
+            boolean header1Made = false;
             for(int z = 0; z < groupTotal; z++ ){
                 dom = extractDomain(0, bmArrSep[z]);
                 while(!(bmArrSep[z][numURLsInGroup][0] == null))
@@ -544,15 +548,96 @@ public class Main {
 
 
                 //
-                }else if(numURLsInGroup <= 4 && numURLsInGroup >= 2){
-                    writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                }else if(numURLsInGroup == 4){
+
+                    if(!header4Made){
+                        writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() + "\" LAST_MODIFIED=\"" + updateTime() + "\">" + "4 Links </H3>\n\t\t<DL><p>");
+                        header4Made = true;
+                    }
+
+                    writer.println( "\t\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
                             "\" LAST_MODIFIED=\"" + updateTime() + "\">" +
                             (dom.length() <= 3 ? dom.toUpperCase() : dom.substring(0, 1).toUpperCase() + dom.substring(1)) +
-                            " (" + numURLsInGroup + ")</H3>");
+                            " (" + numURLsInGroup + ")</H3>\n\t\t\t<DL><p>");
+
+                    for(int x = 0; x < numURLsInGroup; x++){
+                        String icon = bmArrSep[z][x][3];
+                        writer.println( "\t\t\t\t<DT><A HREF=\"" + bmArrSep[z][x][0] +
+                                "\" ADD_DATE=\"" + (bmArrSep[z][x][2] == null ? "0" : bmArrSep[z][x][2]) +
+                                (icon == null ? "" : ("\" ICON=\""+ icon)) +
+                                "\">" + bmArrSep[z][x][1] + "</A>");
+                    }
+                    writer.println("\t\t\t</DL><p>");
+
+
+                }else if(numURLsInGroup == 3){
+
+                    if(!header3Made){
+                        writer.println("\t\t</DL><p>");
+                        writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() + "\" LAST_MODIFIED=\"" + updateTime() + "\">" + "3 Links </H3>\n\t\t<DL><p>");
+                        header3Made = true;
+                    }
+
+                    writer.println( "\t\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                            "\" LAST_MODIFIED=\"" + updateTime() + "\">" +
+                            (dom.length() <= 3 ? dom.toUpperCase() : dom.substring(0, 1).toUpperCase() + dom.substring(1)) +
+                            " (" + numURLsInGroup + ")</H3>\n\t\t\t<DL><p>");
+
+                    for(int x = 0; x < numURLsInGroup; x++){
+                        String icon = bmArrSep[z][x][3];
+                        writer.println( "\t\t\t\t<DT><A HREF=\"" + bmArrSep[z][x][0] +
+                                "\" ADD_DATE=\"" + (bmArrSep[z][x][2] == null ? "0" : bmArrSep[z][x][2]) +
+                                (icon == null ? "" : ("\" ICON=\""+ icon)) +
+                                "\">" + bmArrSep[z][x][1] + "</A>");
+                    }
+                    writer.println("\t\t\t</DL><p>");
+
+
+                }else if(numURLsInGroup == 2){
+
+
+                    if(!header2Made){
+                        writer.println("\t\t</DL><p>");
+                        writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() + "\" LAST_MODIFIED=\"" + updateTime() + "\">" + "2 Links </H3>\n\t\t<DL><p>");
+                        header2Made = true;
+                    }
+
+                    writer.println( "\t\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                            "\" LAST_MODIFIED=\"" + updateTime() + "\">" +
+                            (dom.length() <= 3 ? dom.toUpperCase() : dom.substring(0, 1).toUpperCase() + dom.substring(1)) +
+                            " (" + numURLsInGroup + ")</H3>\n\t\t\t<DL><p>");
+
+                    for(int x = 0; x < numURLsInGroup; x++){
+                        String icon = bmArrSep[z][x][3];
+                        writer.println( "\t\t\t\t<DT><A HREF=\"" + bmArrSep[z][x][0] +
+                                "\" ADD_DATE=\"" + (bmArrSep[z][x][2] == null ? "0" : bmArrSep[z][x][2]) +
+                                (icon == null ? "" : ("\" ICON=\""+ icon)) +
+                                "\">" + bmArrSep[z][x][1] + "</A>");
+                    }
+                    writer.println("\t\t\t</DL><p>");
+
+
+                }else if(numURLsInGroup == 1){
+
+
+                    if(!header1Made){
+                        writer.println("\t\t</DL><p>");
+                        writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() + "\" LAST_MODIFIED=\"" + updateTime() + "\">" + "1 Link </H3>\n\t\t<DL><p>");
+                        header1Made = true;
+                    }
+
+                    for(int x = 0; x < numURLsInGroup; x++){
+                        String icon = bmArrSep[z][x][3];
+                        writer.println( "\t\t\t<DT><A HREF=\"" + bmArrSep[z][x][0] +
+                                "\" ADD_DATE=\"" + (bmArrSep[z][x][2] == null ? "0" : bmArrSep[z][x][2]) +
+                                (icon == null ? "" : ("\" ICON=\""+ icon)) +
+                                "\">" + bmArrSep[z][x][1] + "</A>");
+                    }
 
                 }
                 numURLsInGroup = 0;
             }
+            writer.println("\t\t</DL><p>");
             writer.println("\t</DL><p>\n</DL><p>");
             writer.close();
 
@@ -573,8 +658,8 @@ public class Main {
     }
 
     private static void createList(){
-        String[] ffFiles = {"FF1.html", "FF2.html", "FF3.html", "FF4.html", "FF5.html", "FF6.html", "FF7.html", "FF8.html", "FF9.html", "FF10.html", "FF11.html", "FF13.html", "FF14.html", "FF12(01-27-16).html", "bm_firefox.txt"};
-        String[] cFiles = {"bm_chrome.txt", "C1.html"};
+        String[] ffFiles = {"FF1.html", "FF2.html", "FF3.html", "FF4.html", "FF5.html", "FF6.html", "FF7.html", "FF8.html", "FF9.html", "FF10.html", "FF11.html", "FF13.html", "FF14.html", "FF15.html", "FF12(01-27-16).html", "bm_firefox.txt"};
+        String[] cFiles = {"bm_chrome.txt", "C1.html", "C2.html"};
         String[] oFiles = {"bm_opera.txt", "O1.html", "O2.html"};
 
         for(int x = 0;x < ffFiles.length;x++){
@@ -717,6 +802,7 @@ public class Main {
             newLink = split[1];
 
 
+            //TODO: This only checks URLS. Check for icons as well as some are getting discarded
             if(!newLink.equals(oldLink)){
                 arr[newTotal][0] = bmArr[x][0];
                 arr[newTotal][1] = bmArr[x][1];
