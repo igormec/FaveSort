@@ -7,6 +7,7 @@ public class Main {
 
     private static String[][] bmArr = new String[6000][4];
     private static String[][][] bmArrSep;
+    private static int numGroups = 0;
     private static String[] lines = new String[2000];
     private static int total = 0;
 
@@ -37,7 +38,7 @@ public class Main {
         }
 
         createDomainGroups();
-        //sortDomainGroups();
+        sortGroups();
         generateHTMLfile();
 
         endTime = System.currentTimeMillis();
@@ -547,7 +548,7 @@ public class Main {
                     writer.println("\t\t</DL><p>");
 
 
-                //
+                //TODO: Clean this up...very messy
                 }else if(numURLsInGroup == 4){
 
                     if(!header4Made){
@@ -839,7 +840,7 @@ public class Main {
                 bmArrSep[domainCount][groupLength][1] = bmArr[x][1];
                 bmArrSep[domainCount][groupLength][2] = bmArr[x][2];
                 bmArrSep[domainCount][groupLength][3] = bmArr[x][3];
-
+                numGroups++;
                 domainCount++;
 
             }else {
@@ -872,7 +873,7 @@ public class Main {
                     bmArrSep[domainCount][groupLength][2] = bmArr[x][2];
                     bmArrSep[domainCount][groupLength][3] = bmArr[x][3];
                     groupLength++;
-
+                    numGroups++;
                     domainCount++;
 
                 }
@@ -888,7 +889,6 @@ public class Main {
 
                 int arrCount1 = 0;
                 int arrCount2 = 0;
-
 
                 while(!(bmArrSep[b][arrCount1][0] == null))
                     arrCount1++;
@@ -940,6 +940,49 @@ public class Main {
             }
         }
 
+    }
+
+    private static void sortGroups(){
+
+
+        for(int x = 0; x < numGroups; x++) {
+            long link1;
+            long link2;
+            int numURLsInGroup = 0;
+
+            while (!(bmArrSep[x][numURLsInGroup][0] == null))
+                numURLsInGroup++;
+
+            if (numURLsInGroup > 1) {
+                for (int a = 0; a < numURLsInGroup - 1; a++) {
+
+                    for (int b = 0; b < numURLsInGroup - (a + 1); b++) {
+                        link1 = Long.parseLong(bmArrSep[x][b][2]);
+                        link2 = Long.parseLong(bmArrSep[x][b + 1][2]);
+
+                        if (link1 > link2) {
+
+                            String temp1 = bmArrSep[x][b][0];
+                            String temp2 = bmArrSep[x][b][1];
+                            String temp3 = bmArrSep[x][b][2];
+                            String temp4 = bmArrSep[x][b][3];
+
+                            bmArrSep[x][b][0] = bmArrSep[x][b + 1][0];
+                            bmArrSep[x][b][1] = bmArrSep[x][b + 1][1];
+                            bmArrSep[x][b][2] = bmArrSep[x][b + 1][2];
+                            bmArrSep[x][b][3] = bmArrSep[x][b + 1][3];
+
+                            bmArrSep[x][b + 1][0] = temp1;
+                            bmArrSep[x][b + 1][1] = temp2;
+                            bmArrSep[x][b + 1][2] = temp3;
+                            bmArrSep[x][b + 1][3] = temp4;
+
+
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
