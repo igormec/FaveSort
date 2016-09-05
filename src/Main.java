@@ -37,7 +37,8 @@ public class Main {
         }
 
         createDomainGroups();
-        //generateHTMLfile();
+        //sortDomainGroups();
+        generateHTMLfile();
 
         endTime = System.currentTimeMillis();
         System.out.println("\n\n\nProcess Complete\nRUNTIME: " + ((endTime - startTime)/1000L) + " sec  " + ((endTime - startTime)%1000L) + " ms");
@@ -438,7 +439,7 @@ public class Main {
             PrintWriter writer = new PrintWriter("Resources/"+file, "UTF-8");
 
             for(int x = 0;x < total; x++){
-                writer.println(bmArr[x][0] + "  =====  " + bmArr[x][1] + "  =====  " + bmArr[x][2] + "  =====  " + bmArr[x][3]);
+                writer.println(bmArr[x][0] + "  =====  " + bmArr[x][1] + "  =====  " + bmArr[x][2] + "  =====  " + (bmArr[x][3]==null ? "" : bmArr[x][3] ));
             }
 
             writer.close();
@@ -461,7 +462,10 @@ public class Main {
                 bmArr[total][0] = split[0];
                 bmArr[total][1] = split[1];
                 bmArr[total][2] = split[2];
-                bmArr[total][3] = split[3];
+                if(split.length == 3)
+                    bmArr[total][3] = null;
+                else
+                    bmArr[total][3] = split[3];
 
                 total++;
             }
@@ -479,7 +483,7 @@ public class Main {
     private static void generateHTMLfile(){
 
         try{
-            PrintWriter writer = new PrintWriter("bookmarks_final.html", "UTF-8");
+            PrintWriter writer = new PrintWriter("bookmarks_final_grouped.html", "UTF-8");
 
             //Print file header
             writer.println( "<!DOCTYPE NETSCAPE-Bookmark-file-1>\n" +
@@ -496,15 +500,62 @@ public class Main {
                                 "\" PERSONAL_TOOLBAR_FOLDER=\"true\">Bookmarks bar</H3>\n\t<DL><p>");
 
 
-            for(int x = 0; x < total; x++){
-                writer.println( "\t\t<DT><A HREF=\"" + bmArr[x][0] + "\" " +
-                                "ADD_DATE=\"" + (bmArr[x][2] == null ? "0" : bmArr[x][2]) + "\"" +
-                                (bmArr[x][3] == null ? "" : " ICON=\"" + bmArr[x][3] + "\"") + ">" +
-                                bmArr[x][1] + "</A> ");
+
+            //This loop counts the number of groups there are in total
+            int groupTotal = 0;
+            for(int b = 0; b < bmArrSep.length; b++){
+                if(bmArrSep[b][0][0] == null)
+                    break;
+                else
+                    groupTotal++;
+            }
+            System.out.println("Found " + groupTotal + " groups.");
+
+
+            //Loop makes a HTML folder for every group
+            int numURLsInGroup = 0;
+            String dom;
+            for(int z = 0; z < groupTotal; z++ ){
+                dom = extractDomain(0, bmArrSep[z]);
+                while(!(bmArrSep[z][numURLsInGroup][0] == null))
+                    numURLsInGroup++;
+
+                //This if else block will first makes groups for websites with more than 4 favourites
+                //Then it will make a group called 4 which will contain all groups of 4 URLs in subgroups
+                //After that it does the same for groups of 3 and 2
+                if(numURLsInGroup > 4) {
+
+                    //Prints the folder header
+                    writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                                    "\" LAST_MODIFIED=\"" + updateTime() + "\">" +
+                                    (dom.length() <= 3 ? dom.toUpperCase() : dom.substring(0, 1).toUpperCase() + dom.substring(1)) +
+                                    " (" + numURLsInGroup + ")</H3>\n\t\t<DL><p>");
+
+
+                    //For loop prints all URLs in the current group/folder (bmArrSep[z])
+                    for(int x = 0; x < numURLsInGroup; x++){
+                        String icon = bmArrSep[z][x][3];
+                        writer.println( "\t\t\t<DT><A HREF=\"" + bmArrSep[z][x][0] +
+                                        "\" ADD_DATE=\"" + (bmArrSep[z][x][2] == null ? "0" : bmArrSep[z][x][2]) +
+                                        (icon == null ? "" : ("\" ICON=\""+ icon)) +
+                                        "\">" + bmArrSep[z][x][1] + "</A>");
+                    }
+                    writer.println("\t\t</DL><p>");
+
+
+                //
+                }else if(numURLsInGroup <= 4 && numURLsInGroup >= 2){
+                    writer.println( "\t\t<DT><H3 ADD_DATE=\"" + updateTime() +
+                            "\" LAST_MODIFIED=\"" + updateTime() + "\">" +
+                            (dom.length() <= 3 ? dom.toUpperCase() : dom.substring(0, 1).toUpperCase() + dom.substring(1)) +
+                            " (" + numURLsInGroup + ")</H3>");
+
+                }
+                numURLsInGroup = 0;
             }
             writer.println("\t</DL><p>\n</DL><p>");
-
             writer.close();
+
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -621,51 +672,15 @@ public class Main {
 
     private static void sortByDomain(){
 
-        String[] split;
-        String dom;
-        String link;
         String link1;
         String link2;
         for(int x = 0; x < total-1; x++){
-
             for(int y = 0; y < total-(x+1); y++){
 
-                dom = "";
-                link = "";
+                link1 = extractDomain(y);
+                link2 = extractDomain(y+1);
 
-                split = bmArr[y][0].split("://www.");
-                link = split[1];
-                split = link.split("/");
-                link = split[0];
-                split = link.split("\\.");
-
-                if(split[split.length-2].length() <= 2 && split.length > 2 && !split[split.length-2].equals("td")) {
-                    dom = split[split.length-3];
-
-                }else{
-                    dom = split[split.length-2];
-                }
-                link1 = dom;
-
-
-
-                split = bmArr[y+1][0].split("://www.");
-                link = split[1];
-                split = link.split("/");
-                link = split[0];
-                split = link.split("\\.");
-
-                if(split[split.length-2].length() <= 2 && split.length > 2 && !split[split.length-2].equals("td")) {
-                    dom = split[split.length-3];
-
-                }else{
-                    dom = split[split.length-2];
-                }
-                link2 = dom;
-
-                int comp = link1.compareToIgnoreCase(link2);
-
-                if(comp > 0){
+                if(link1.compareToIgnoreCase(link2) > 0){
 
                     String temp1 = bmArr[y][0];
                     String temp2 = bmArr[y][1];
@@ -702,7 +717,7 @@ public class Main {
             newLink = split[1];
 
 
-            if(!newLink.equals(oldLink)/* || !newDesc.equals(oldDesc)*/){
+            if(!newLink.equals(oldLink)){
                 arr[newTotal][0] = bmArr[x][0];
                 arr[newTotal][1] = bmArr[x][1];
                 arr[newTotal][2] = bmArr[x][2];
@@ -710,7 +725,6 @@ public class Main {
                 newTotal++;
             }
             oldLink = newLink;
-            //oldDesc = newDesc;
         }
         bmArr = arr;
         total = newTotal;
@@ -720,8 +734,6 @@ public class Main {
 
         String[][] domains = new String[2000][2];
         bmArrSep = new String[1000][500][4];
-        String[] split;
-        String link;
         String dom = "";
         int domainCount = 0;
         int groupLength = 0;
@@ -730,38 +742,7 @@ public class Main {
 
         for(int x = 0; x < total; x++){
 
-            //Example URL: https://www.easyweb.td.com/waw/idp/login.htm?execution=e1s1
-
-            split = bmArr[x][0].split("://www.");
-            link = split[1];
-            //SPLIT MAKES: "https      ://www.      easyweb.td.com/waw/idp/login.htm?execution=e1s1"
-
-
-            split = link.split("/");
-            link = split[0];
-            //SPLIT MAKES: "easyweb.td.com    /    waw    /    idp    /     login.htm?execution=e1s1"
-
-
-
-            split = link.split("\\.");
-            //SPLIT MAKES: "easyweb   .   td   .   com"
-
-            //This if else block will determine what the main domain is
-            //if the second-last element of split array is 2 or less characters long, that element is the first part of a top level domain (such as gc.ca or co.uk)
-            //therefore the main domain would be the third-last element of split array (the element BEFORE gc or co)
-            //ONE EXCEPTION IS HARDCODED IN (td) since it breaks above rules. More domains can be hard coded in by duplicating last condition
-            if(     split[split.length-2].length() <= 2 &&
-                    split.length > 2 &&
-                    !split[split.length-2].equals("td"))
-            {
-
-                dom = split[split.length-3];
-                //System.out.println("***" + split[split.length - 2] + "." + split[split.length - 1] + "  ----  " + link + "  ----  " + dom);
-
-            }else{
-                dom = split[split.length-2];
-            }
-
+            dom = extractDomain(x);
 
             if(domainCount==0){
                 domains[domainCount][0] = dom;
@@ -813,7 +794,7 @@ public class Main {
         }
 
 
-        //For loop to sort by most used domains
+        //For loop to sort by most common domains
         for(int a = 0;a < domainCount-1;a++){
             for(int b = 0;b < domainCount-(a+1);b++){
 
@@ -834,7 +815,7 @@ public class Main {
                     for(int e = 0; e < 400; e++){
                         for( int f = 0; f < 4; f++){
                             temp1[e][f] = bmArrSep[b][e][f];
-                            bmArrSep[b][e][f] = null;
+                            bmArrSep[b][e][f] = "";
                         }
                     }
 
@@ -842,7 +823,7 @@ public class Main {
                         for( int f = 0; f < 4; f++){
                             bmArrSep[b][e][f] = bmArrSep[b+1][e][f];
                             bmArrSep[b+1][e][f] = temp1[e][f];
-                            temp1[e][f] = null;
+                            temp1[e][f] = "";
 
                         }
                     }
@@ -877,6 +858,41 @@ public class Main {
 
 
     //=================OTHER METHODS===================//
+
+    public static String extractDomain(int x){ return extractDomain(x, bmArr);}
+
+    private static String extractDomain(int x, String[][] extractArray){
+
+        String[] split;
+        String link;
+
+        //Example URL: https://www.easyweb.td.com/waw/idp/login.htm?execution=e1s1
+
+        split = extractArray[x][0].split("://www.");
+        link = split[1];
+        //SPLIT MAKES: "https      ://www.      easyweb.td.com/waw/idp/login.htm?execution=e1s1"
+
+        split = link.split("/");
+        link = split[0];
+        //SPLIT MAKES: "easyweb.td.com    /    waw    /    idp    /     login.htm?execution=e1s1"
+
+        split = link.split("\\.");
+        //SPLIT MAKES: "easyweb   .   td   .   com"
+
+        //This if else block will determine what the main domain is
+        //if the second-last element of split array is 2 or less characters long, that element is probably the first part of a top level domain (such as gc.ca or co.uk)
+        //therefore, instead of being the second-last element, the main domain would be the third-last element of split array (the element BEFORE gc or co)
+        //ONE EXCEPTION IS HARDCODED IN (td) since it breaks above rules. More domains can be hard coded in by duplicating last condition (main domain is 2 or less characters)
+        if(     split[split.length-2].length() <= 2 &&
+                split.length > 2 &&
+                !split[split.length-2].equals("td"))
+        {
+            return split[split.length-3];
+
+        }else{
+            return split[split.length-2];
+        }
+    }
 
     private static void emptyLines(){
         for(int x = 0;x<2000;x++){
